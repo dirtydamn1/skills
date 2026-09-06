@@ -9,6 +9,14 @@ author: dirtydamn
 
 给 Hermes Agent 修 bug、提 PR 的标准流程。核心是**单仓库双 remote + fix 分支**，保证日常使用稳定、开发隔离、可无痛升级。
 
+> ## ⚠️ 必读：官方 Contributing 文档
+> **提 PR 前必须先完整阅读官方贡献指南：**
+> **https://hermes-agent.nousresearch.com/docs/developer-guide/contributing**
+>
+> 涵盖：开发环境搭建、测试运行（`scripts/run_tests.sh`）、代码风格、Windows 兼容检查（`scripts/check-windows-footguns.py`）、**分支命名规范**、**PR 描述要求**、**Conventional Commits 提交规范**（`<type>(<scope>): <desc>`）、MIT 许可声明。
+>
+> 本 skill 的流程、命名、提交规范均以该文档为准；两者冲突时以官方文档为准。
+
 ## 一、双 remote 共存配置（一次性）
 
 前提：Hermes 由官方 install.sh 安装到 `~/.hermes/hermes-agent`，`origin` 已指向官方仓库。
@@ -113,4 +121,5 @@ git push myfork fix/<描述>                # 推送
 ## 相关
 
 - 日常批量重启 gateway：hermes-gateway-batch skill（自带终端执行）。
-- 官方 CONTRIBUTING.md 有分支命名与提交规范。
+- 官方贡献指南（必读）：https://hermes-agent.nousresearch.com/docs/developer-guide/contributing
+- 官方仓库 CONTRIBUTING.md：https://github.com/NousResearch/hermes-agent/blob/main/CONTRIBUTING.md
