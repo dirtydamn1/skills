@@ -18,7 +18,7 @@ author: dirtydamn
 
 ## 前置条件
 
-**① 必须装好 Lark CLI**，先自检：
+**1. 必须装好 Lark CLI**，先自检：
 
 ```bash
 command -v lark-cli        # 没输出 = 没装
@@ -28,11 +28,11 @@ lark-cli auth status       # 看身份是否 ready
 **所有表格操作都用 `lark-cli` 完成**，没装就先根据这个文档装上：
   - Lark CLI：https://github.com/larksuite/cli
 
-**② 必须拿到电子表格的读写权限**
+**2. 必须拿到电子表格的读写权限**
 
 - scope：读写用 `sheets:spreadsheet`（只读用 `sheets:spreadsheet:read`）
 
-**③ 拿到台账地址**：电子表格 URL（`https://<租户>.feishu.cn/sheets/<token>`）。后面所有命令都用 `--url` 直接传它。
+**3. 拿到台账地址**：电子表格 URL（`https://<租户>.feishu.cn/sheets/<token>`）。后面所有命令都用 `--url` 直接传它。
 
 ## 台账表结构
 
@@ -90,18 +90,18 @@ lark-cli auth status       # 看身份是否 ready
 ## 工作流
 
 ```
-⓪ 前置：command -v lark-cli 自检；未装 → 让用户安装
+0. 前置：command -v lark-cli 自检；未装 → 让用户安装
    https://github.com/larksuite/cli 并授予表格读写权限，再继续
-① 读台账「当前」表最后 200 行  ← 必做，先建立"历史推过什么"的清单
-② 收集本批次的候选内容（搜索优先级见下）
-③ 逐条比对历史：
+1. 任务书校验：口径是否已定死、任务书五项是否齐全，缺项先补齐（规范见 references/task-spec.md）
+2. 读台账「当前」表最后 200 行  ← 必做，先建立"历史推过什么"的清单
+3. 收集本批次的候选内容（搜索优先级见下）
+4. 逐条比对历史：
      - 完全推过、无新进展        → 丢弃
      - 推过、但有新进展          → 做成"补充"条目（内容里点明进展，可引用原条目日期）
      - 没推过                    → 新条目
-④ 按热度排序，选出用户要的条数（默认 5–8 条）
-⑤ 问用户本批次的「类型」（若用户已说明则直接用）
-⑥ 定稿 → 写入「当前」表（追加到最后一个非空行之后），**写完回读校验**
-⑦ 检查行数是否达阈值 → 达阈值则归档（流程见 [references/archive.md](references/archive.md)）
+5. 按热度排序，选出用户要的条数（默认 5–8 条）
+6. 定稿 → 写入「当前」表（追加到最后一个非空行之后），**写完回读校验**
+7. 检查行数是否达阈值 → 达阈值则归档（流程见 [references/archive.md](references/archive.md)）
 ```
 
 **搜索优先级**（第一条固定是 DuckDuckGo search；可被用户在团队里另行约定覆盖）：
@@ -160,6 +160,7 @@ lark-cli auth status       # 看身份是否 ready
 
 | 文件 | 内容 |
 |---|---|
+| [references/task-spec.md](references/task-spec.md) | **任务书规范（定时任务 / 被动执行）**：开工前至少向用户确认 1 次核对信息、任务书必须写明的 5 项、标准任务书模板与示例、落地检查项 |
 | [references/archive.md](references/archive.md) | **归档流程**：达标后新建 `归档-YYYY-MM-DD`，用 `+range-move` 跨表剪切最早那批、剩余上移压实、回读核对（含完整命令序列与阈值） |
 | [references/lark-cli-cheatsheet.md](references/lark-cli-cheatsheet.md) | **lark-cli 命令速查**：本技能用到的全部 shortcut + 易错点（A1 引用加单引号、`+csv-put`/`+dim-insert` 的参数差异等） |
 | [references/iptc-topics.md](references/iptc-topics.md) | **题材类别表**：IPTC Media Topics 中文 19 类（`题材类别` 列只能取自这里）+ 官方词表链接 |
@@ -173,6 +174,7 @@ lark-cli auth status       # 看身份是否 ready
 - **日期被读成序列号**：读单元格时日期可能返回 Excel 序列号（`2026-09-13` → `46023`）；搬移行之前先抽查一行确认读到的是日期文本，别把数字搬进归档表。
 - **来源列写成字面 `\n`**：写 JSON / CSV 里必须是真的换行符；写完**回读**确认单元格里是换行而不是两个字符。
 - **`来源` 只贴聚合镜像**：MSN / Yahoo 转载链接会失效或改址，尽量回到原始媒体 URL。
+- **`+csv-put` 的 payload 不能带表头**：用 csv.DictWriter/手工拼 CSV 时若写了 header 行，表头会被当成数据写进表格中间（追加写入时尤其明显：第 N 行多出一行表头，后续读取/归档全部错位）。只写数据行；若已写错，用 `+range-move` 把数据段整体上移一行压实（先 `--dry-run`），再回读 `current_region` 确认没有多余行。
 - **行数不够**：写入超出工作表现有行数会失败；先 `+dim-insert` 加行，或建表时 `--row-count` 给够。
 - **归档不要用"删行"**：删行会连带影响引用与格式；用 `+range-move` 跨表剪切 + 剩余段上移压实。
 - **`+cells-clear` 是 high-risk-write**：先 `--dry-run` 看范围，再带 `--yes` 执行；不可撤销。
